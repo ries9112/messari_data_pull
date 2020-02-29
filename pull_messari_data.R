@@ -1,6 +1,14 @@
 library(httr)
 library(jsonlite)
 
+get_response_content <- function(api_response) {
+  httr::content(api_response,
+                type = "text",
+                encoding = "UTF-8") %>%
+    jsonlite::fromJSON(simplifyDataFrame = FALSE)
+}
+
+
 all_assets <- httr::GET("https://data.messari.io/api/v1/assets")
 
 all_assets <- get_response_content(all_assets)
