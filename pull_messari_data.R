@@ -190,7 +190,45 @@ if (length(all_assets$data[[i]]$profile$overview) > 0){
 
 }
 
+# unique the data
+crypto_data <- unique(crypto_data)
 
+# add date and date_time
+crypto_data$date <- Sys.Date()
+crypto_data$date_time <- Sys.time()
+
+# add pkDummy
+crypto_data$pkDummy <- substr(crypto_data$date_time, 1,13)
+# add pkey
+crypto_data$pkey <- paste0(crypto_data$pkDummy,crypto_data$symbol)
+
+
+
+#### HERE WRITE DATA TO DB ####
+library(DBI)
+library(RMariaDB)
+
+Sys.setenv(user=db_user, pswd=db_pswd,ipAddress=db_ip)
+getSqlConnection <- function(){
+  con <-
+    dbConnect(
+      RMariaDB::MariaDB(),
+      username = Sys.getenv('user'),
+      password = Sys.getenv('pswd'),
+      host = Sys.getenv('ipAddress'),
+      dbname = 'ScrapeStorm'
+    )
+  return(con)
+}
+database_connection <- getSqlConnection()
+
+
+# write data to database
+#dbWriteTable(database_connection, "NEW TABLE HERE",df, append=T)
+
+
+# Disconnect from the database
+dbDisconnect(database_connection)
 
 
 #### HERE PIN DATA ####
@@ -199,7 +237,15 @@ if (length(all_assets$data[[i]]$profile$overview) > 0){
 
 
 
-#### HERE WRITE DATA TO DB ####
+
+
+
+
+
+
+
+
+
 
 
 
