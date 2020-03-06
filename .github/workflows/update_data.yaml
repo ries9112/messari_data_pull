@@ -5,7 +5,7 @@ on:
 name: update_data
 
 jobs:
-  R-CMD-check:
+  update_data:
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v2
