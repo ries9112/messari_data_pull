@@ -17,5 +17,8 @@ jobs:
         shell: Rscript {0}
       - name: Pull data and update db and pin
         run: |
+          db_user <- "${{secrets.db_user}}"
+          db_ip <- "${{secrets.db_ip}}"
+          db_pswd <- "${{secrets.db_pswd}}"
           source('pull_messari_data_scheduled.R')
         shell: Rscript {0}
