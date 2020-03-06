@@ -1,5 +1,8 @@
 library(httr)
 library(jsonlite)
+library(dplyr)
+library(DBI)
+library(RMariaDB)
 
 get_response_content <- function(api_response) {
   httr::content(api_response,
@@ -30,7 +33,7 @@ if (length(all_assets$data[[i]]$metrics$market_data$volume_last_24_hours) > 0){
   crypto_data[i,'volume_last_24_hours'] <- all_assets$data[[i]]$metrics$market_data$volume_last_24_hours
 }
 if (length(all_assets$data[[i]]$metrics$market_data$real_volume_last_24_hours) > 0){
-  crypto_data[i,'real_volume_last_24_hours'] <- all_assets$data[[i]]$metrics$market_data$real_volume_last_24_hour
+  crypto_data[i,'real_volume_last_24_hours'] <- all_assets$data[[i]]$metrics$market_data$real_volume_last_24_hours
 }
 # OHLCV 1 Hour
 if (length(all_assets$data[[i]]$metrics$market_data$ohlcv_last_1_hour$open) > 0){
@@ -84,118 +87,338 @@ if (length(all_assets$data[[i]]$metrics$marketcap$volume_turnover_last_24_hours_
 if (length(all_assets$data[[i]]$metrics$supply$y_2050) > 0){
   crypto_data[i,"supply_y_2050"] <- all_assets$data[[i]]$metrics$supply$y_2050
 }
-##### STOPPED HERE, KEEP GOING! #####
-
-#ENTER THE REST HERE (only did first)
- 
-# Blockchain Stats 24 Hours
-if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$transaction_volume) > 0){
-  crypto_data[i,"transaction_volume_24_hours"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$transaction_volume
+if (length(all_assets$data[[i]]$metrics$supply$annual_inflation_percent) > 0){
+  crypto_data[i,"annual_inflation_percent"] <- all_assets$data[[i]]$metrics$supply$annual_inflation_percent
 }
-#ENTER THE REST HERE (only did first)
- 
-# Market Data Liquidity (this one is a bit weird careful with subsetting)
-# if (length(all_assets$data[[i]]$metrics$market_data_liquidity$clearing_prices_to_sell[[i]]$amount_usd) > 0){
-#   crypto_data[i,"clearning_prices_to_sell_amount_usd"] <- all_assets$data[[i]]$metrics$market_data_liquidity$clearing_prices_to_sell[[i]]$amount_usd
-# }
-#ENTER THE REST HERE (only did first)
- 
+if (length(all_assets$data[[i]]$metrics$supply$stock_to_flow) > 0){
+  crypto_data[i,"stock_to_flow"] <- all_assets$data[[i]]$metrics$supply$stock_to_flow
+}
+if (length(all_assets$data[[i]]$metrics$supply$y_plus10_issued_percent) > 0){
+  crypto_data[i,"y_plus10_issued_percent"] <- all_assets$data[[i]]$metrics$supply$y_plus10_issued_percent
+}
+# Blockchain Stats
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$transaction_volume) > 0){
+  crypto_data[i,"transaction_volume"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$transaction_volume
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$adjusted_transaction_volume) > 0){
+  crypto_data[i,"adjusted_transaction_volume"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$adjusted_transaction_volume
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$sum_of_fees) > 0){
+  crypto_data[i,"sum_of_fees"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$sum_of_fees
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$median_tx_value) > 0){
+  crypto_data[i,"median_tx_value"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$median_tx_value
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$median_tx_fee) > 0){
+  crypto_data[i,"median_tx_fee"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$median_tx_fee
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$count_of_active_addresses) > 0){
+  crypto_data[i,"count_of_active_addresses"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$count_of_active_addresses
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$count_of_tx) > 0){
+  crypto_data[i,"count_of_tx"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$count_of_tx
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$count_of_payments) > 0){
+  crypto_data[i,"count_of_payments"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$count_of_payments
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$new_issuance) > 0){
+  crypto_data[i,"new_issuance"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$new_issuance
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$average_difficulty) > 0){
+  crypto_data[i,"average_difficulty"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$average_difficulty
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$kilobytes_added) > 0){
+  crypto_data[i,"kilobytes_added"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$kilobytes_added
+}
+if (length(all_assets$data[[i]]$metrics$blockchain_stats_24_hours$count_of_blocks_added) > 0){
+  crypto_data[i,"count_of_blocks_added"] <- all_assets$data[[i]]$metrics$blockchain_stats_24_hours$count_of_blocks_added
+}
 # All Time High
 if (length(all_assets$data[[i]]$metrics$all_time_high$price) > 0){
   crypto_data[i,"ath_price"] <- all_assets$data[[i]]$metrics$all_time_high$price
 }
-#ENTER THE REST HERE (only did first)
-
+if (length(all_assets$data[[i]]$metrics$all_time_high$at) > 0){
+  crypto_data[i,"ath_date"] <- all_assets$data[[i]]$metrics$all_time_high$at
+}
+if (length(all_assets$data[[i]]$metrics$all_time_high$days_since) > 0){
+  crypto_data[i,"ath_days_since"] <- all_assets$data[[i]]$metrics$all_time_high$days_since
+}
+if (length(all_assets$data[[i]]$metrics$all_time_high$percent_down) > 0){
+  crypto_data[i,"ath_percent_down"] <- all_assets$data[[i]]$metrics$all_time_high$percent_down
+}
+if (length(all_assets$data[[i]]$metrics$all_time_high$breakeven_multiple) > 0){
+  crypto_data[i,"ath_breakeven_multiple"] <- all_assets$data[[i]]$metrics$all_time_high$breakeven_multiple
+}
 # Cycle Low
 if (length(all_assets$data[[i]]$metrics$cycle_low$price) > 0){
   crypto_data[i,"cycle_low_price"] <- all_assets$data[[i]]$metrics$cycle_low$price
 }
-#ENTER THE REST HERE (only did first)
- 
+if (length(all_assets$data[[i]]$metrics$cycle_low$at) > 0){
+  crypto_data[i,"cycle_low_date"] <- all_assets$data[[i]]$metrics$cycle_low$at
+}
+if (length(all_assets$data[[i]]$metrics$cycle_low$percent_up) > 0){
+  crypto_data[i,"cycle_low_percent_up"] <- all_assets$data[[i]]$metrics$cycle_low$percent_up
+}
+if (length(all_assets$data[[i]]$metrics$cycle_low$days_since) > 0){
+  crypto_data[i,"cycle_low_days_since"] <- all_assets$data[[i]]$metrics$cycle_low$days_since
+}
 # Token Sale Stats
 if (length(all_assets$data[[i]]$metrics$token_sale_stats$sale_proceeds_usd) > 0){
   crypto_data[i,"token_sale_proceeds_usd"] <- all_assets$data[[i]]$metrics$token_sale_stats$sale_proceeds_usd
 }
-#ENTER THE REST HERE (only did first)
-
+if (length(all_assets$data[[i]]$metrics$token_sale_stats$sale_start_date) > 0){
+  crypto_data[i,"token_sale_start_date"] <- all_assets$data[[i]]$metrics$token_sale_stats$sale_start_date
+}
+if (length(all_assets$data[[i]]$metrics$token_sale_stats$sale_end_date) > 0){
+  crypto_data[i,"token_sale_end_date"] <- all_assets$data[[i]]$metrics$token_sale_stats$sale_end_date
+}
+if (length(all_assets$data[[i]]$metrics$token_sale_stats$roi_since_sale_usd_percent) > 0){
+  crypto_data[i,"roi_since_sale_usd_percent"] <- all_assets$data[[i]]$metrics$token_sale_stats$roi_since_sale_usd_percent
+}
+if (length(all_assets$data[[i]]$metrics$token_sale_stats$roi_since_sale_btc_percent) > 0){
+  crypto_data[i,"roi_since_sale_btc_percent"] <- all_assets$data[[i]]$metrics$token_sale_stats$roi_since_sale_btc_percent
+}
+if (length(all_assets$data[[i]]$metrics$token_sale_stats$roi_since_sale_eth_percent) > 0){
+  crypto_data[i,"roi_since_sale_eth_percent"] <- all_assets$data[[i]]$metrics$token_sale_stats$roi_since_sale_eth_percent
+}
 # Staking Stats
 if (length(all_assets$data[[i]]$metrics$staking_stats$staking_yield_percent) > 0){
   crypto_data[i,"staking_yield_percent"] <- all_assets$data[[i]]$metrics$staking_stats$staking_yield_percent
 }
-#ENTER THE REST HERE (only did first)
- 
+if (length(all_assets$data[[i]]$metrics$staking_stats$staking_type) > 0){
+  crypto_data[i,"staking_type"] <- all_assets$data[[i]]$metrics$staking_stats$staking_type
+}
+if (length(all_assets$data[[i]]$metrics$staking_stats$staking_minimum) > 0){
+  crypto_data[i,"staking_minimum"] <- all_assets$data[[i]]$metrics$staking_stats$staking_minimum
+}
+if (length(all_assets$data[[i]]$metrics$staking_stats$tokens_staked) > 0){
+  crypto_data[i,"tokens_staked"] <- all_assets$data[[i]]$metrics$staking_stats$tokens_staked
+}
+if (length(all_assets$data[[i]]$metrics$staking_stats$tokens_staked_percent) > 0){
+  crypto_data[i,"tokens_staked_percent"] <- all_assets$data[[i]]$metrics$staking_stats$tokens_staked_percent
+}
+if (length(all_assets$data[[i]]$metrics$staking_stats$real_staking_yield_percent) > 0){
+  crypto_data[i,"real_staking_yield_percent"] <- all_assets$data[[i]]$metrics$staking_stats$real_staking_yield_percent
+}
 # Mining Stats
 if (length(all_assets$data[[i]]$metrics$mining_stats$mining_algo) > 0){
   crypto_data[i,"mining_algorithm"] <- all_assets$data[[i]]$metrics$mining_stats$mining_algo
 }
-# #ENTER THE REST HERE (only did first)
-
+if (length(all_assets$data[[i]]$metrics$mining_stats$network_hash_rate) > 0){
+  crypto_data[i,"network_hash_rate"] <- all_assets$data[[i]]$metrics$mining_stats$network_hash_rate
+}
+if (length(all_assets$data[[i]]$metrics$mining_stats$available_on_nicehash_percent) > 0){
+  crypto_data[i,"available_on_nicehash_percent"] <- all_assets$data[[i]]$metrics$mining_stats$available_on_nicehash_percent
+}
+if (length(all_assets$data[[i]]$metrics$mining_stats$`1_hour_attack_cost`) > 0){
+  crypto_data[i,"1_hour_attack_cost"] <- all_assets$data[[i]]$metrics$mining_stats$`1_hour_attack_cost`
+}
+if (length(all_assets$data[[i]]$metrics$mining_stats$`24_hour_attack_cost`) > 0){
+  crypto_data[i,"24_hour_attack_cost"] <- all_assets$data[[i]]$metrics$mining_stats$`24_hour_attack_cost`
+}
+if (length(all_assets$data[[i]]$metrics$mining_stats$attack_appeal) > 0){
+  crypto_data[i,"attack_appeal"] <- all_assets$data[[i]]$metrics$mining_stats$attack_appeal
+}
 # Developer Activity
 if (length(all_assets$data[[i]]$metrics$developer_activity$stars) > 0){
   crypto_data[i,"github_stars"] <- all_assets$data[[i]]$metrics$developer_activity$stars
 }
-#ENTER THE REST HERE (only did first)
- 
+if (length(all_assets$data[[i]]$metrics$developer_activity$watchers) > 0){
+  crypto_data[i,"github_watchers"] <- all_assets$data[[i]]$metrics$developer_activity$watchers
+}
+if (length(all_assets$data[[i]]$metrics$developer_activity$commits_last_3_months) > 0){
+  crypto_data[i,"github_commits_last_3_months"] <- all_assets$data[[i]]$metrics$developer_activity$commits_last_3_months
+}
+if (length(all_assets$data[[i]]$metrics$developer_activity$commits_last_1_year) > 0){
+  crypto_data[i,"github_commits_last_1_year"] <- all_assets$data[[i]]$metrics$developer_activity$commits_last_1_year
+}
+if (length(all_assets$data[[i]]$metrics$developer_activity$lines_added_last_3_months) > 0){
+  crypto_data[i,"github_lines_added_last_3_months"] <- all_assets$data[[i]]$metrics$developer_activity$lines_added_last_3_months
+}
+if (length(all_assets$data[[i]]$metrics$developer_activity$lines_added_last_1_year) > 0){
+  crypto_data[i,"github_lines_added_last_1_year"] <- all_assets$data[[i]]$metrics$developer_activity$lines_added_last_1_year
+}
+if (length(all_assets$data[[i]]$metrics$developer_activity$lines_deleted_last_3_months) > 0){
+  crypto_data[i,"github_lines_deleted_last_3_months"] <- all_assets$data[[i]]$metrics$developer_activity$lines_deleted_last_3_months
+}
+if (length(all_assets$data[[i]]$metrics$developer_activity$lines_deleted_last_1_year) > 0){
+  crypto_data[i,"github_lines_deleted_last_1_year"] <- all_assets$data[[i]]$metrics$developer_activity$lines_deleted_last_1_year
+}
 # ROI
 if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_last_1_week) > 0){
   crypto_data[i,"percent_change_last_1_week"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_last_1_week
 }
-#ENTER THE REST HERE (only did first)
- 
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_last_1_month) > 0){
+  crypto_data[i,"percent_change_last_1_month"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_last_1_month
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_last_3_months) > 0){
+  crypto_data[i,"percent_change_last_3_months"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_last_3_months
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_last_1_year) > 0){
+  crypto_data[i,"percent_change_last_1_year"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_last_1_year
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_1_week) > 0){
+  crypto_data[i,"percent_change_btc_last_1_week"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_1_week
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_1_month) > 0){
+  crypto_data[i,"percent_change_btc_last_1_month"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_1_month
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_3_months) > 0){
+  crypto_data[i,"percent_change_btc_last_3_months"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_3_months
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_1_year) > 0){
+  crypto_data[i,"percent_change_btc_last_1_year"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_1_year
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_1_year) > 0){
+  crypto_data[i,"percent_change_btc_last_1_year"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_btc_last_1_year
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_month_to_date) > 0){
+  crypto_data[i,"percent_change_month_to_date"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_month_to_date
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_quarter_to_date) > 0){
+  crypto_data[i,"percent_change_quarter_to_date"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_quarter_to_date
+}
+if (length(all_assets$data[[i]]$metrics$roi_data$percent_change_year_to_date) > 0){
+  crypto_data[i,"percent_change_year_to_date"] <- all_assets$data[[i]]$metrics$roi_data$percent_change_year_to_date
+}
 # ROI by Year
 if (length(all_assets$data[[i]]$metrics$roi_by_year$`2019_usd_percent`) > 0){
-  crypto_data[i,"2019_usd_percent"] <- all_assets$data[[i]]$metrics$roi_by_year$`2019_usd_percent` #added backticks because variable can't start with number
+  crypto_data[i,"2019_usd_percent_change"] <- all_assets$data[[i]]$metrics$roi_by_year$`2019_usd_percent` 
 }
-#ENTER THE REST HERE (only did first)
+if (length(all_assets$data[[i]]$metrics$roi_by_year$`2018_usd_percent`) > 0){
+  crypto_data[i,"2018_usd_percent_change"] <- all_assets$data[[i]]$metrics$roi_by_year$`2018_usd_percent` 
+}
+if (length(all_assets$data[[i]]$metrics$roi_by_year$`2017_usd_percent`) > 0){
+  crypto_data[i,"2017_usd_percent_change"] <- all_assets$data[[i]]$metrics$roi_by_year$`2017_usd_percent` 
+}
+if (length(all_assets$data[[i]]$metrics$roi_by_year$`2016_usd_percent`) > 0){
+  crypto_data[i,"2016_usd_percent_change"] <- all_assets$data[[i]]$metrics$roi_by_year$`2016_usd_percent` 
+}
+if (length(all_assets$data[[i]]$metrics$roi_by_year$`2015_usd_percent`) > 0){
+  crypto_data[i,"2015_usd_percent_change"] <- all_assets$data[[i]]$metrics$roi_by_year$`2015_usd_percent` 
+}
+# Did not include the rest since they aren't relevant for most cryptocurrencies
 
 # Risk Metrics - Sharpe Ratios
 if (length(all_assets$data[[i]]$metrics$risk_metrics$sharpe_ratios$last_30_days) > 0){
   crypto_data[i,"sharpe_last_30_days"] <- all_assets$data[[i]]$metrics$risk_metrics$sharpe_ratios$last_30_days
 }
-#ENTER THE REST HERE (only did first)
-
+if (length(all_assets$data[[i]]$metrics$risk_metrics$sharpe_ratios$last_90_days) > 0){
+  crypto_data[i,"sharpe_last_90_days"] <- all_assets$data[[i]]$metrics$risk_metrics$sharpe_ratios$last_90_days
+}
+if (length(all_assets$data[[i]]$metrics$risk_metrics$sharpe_ratios$last_1_year) > 0){
+  crypto_data[i,"sharpe_last_1_year"] <- all_assets$data[[i]]$metrics$risk_metrics$sharpe_ratios$last_1_year
+}
+if (length(all_assets$data[[i]]$metrics$risk_metrics$sharpe_ratios$last_3_years) > 0){
+  crypto_data[i,"sharpe_last_3_years"] <- all_assets$data[[i]]$metrics$risk_metrics$sharpe_ratios$last_3_years
+}
 # Risk Metrics - Volatility
 if (length(all_assets$data[[i]]$metrics$risk_metrics$volatility_stats$volatility_last_30_days) > 0){
   crypto_data[i,"volatility_last_30_days"] <- all_assets$data[[i]]$metrics$risk_metrics$volatility_stats$volatility_last_30_days
 }
-#ENTER THE REST HERE (only did first)
-
+if (length(all_assets$data[[i]]$metrics$risk_metrics$volatility_stats$volatility_last_90_days) > 0){
+  crypto_data[i,"volatility_last_90_days"] <- all_assets$data[[i]]$metrics$risk_metrics$volatility_stats$volatility_last_90_days
+}
+if (length(all_assets$data[[i]]$metrics$risk_metrics$volatility_stats$volatility_last_1_year) > 0){
+  crypto_data[i,"volatility_last_1_year"] <- all_assets$data[[i]]$metrics$risk_metrics$volatility_stats$volatility_last_1_year
+}
+if (length(all_assets$data[[i]]$metrics$risk_metrics$volatility_stats$volatility_last_3_years) > 0){
+  crypto_data[i,"volatility_last_3_years"] <- all_assets$data[[i]]$metrics$risk_metrics$volatility_stats$volatility_last_3_years
+}
 # Misc Data
 if (length(all_assets$data[[i]]$metrics$misc_data$private_market_price_usd) > 0){
   crypto_data[i,"private_market_price_usd"] <- all_assets$data[[i]]$metrics$misc_data$private_market_price_usd
 }
-#ENTER THE REST HERE (only did first)
- 
+if (length(all_assets$data[[i]]$metrics$misc_data$vladimir_club_cost) > 0){
+  crypto_data[i,"vladimir_club_cost"] <- all_assets$data[[i]]$metrics$misc_data$vladimir_club_cost
+}
+if (length(all_assets$data[[i]]$metrics$misc_data$btc_current_normalized_supply_price_usd) > 0){
+  crypto_data[i,"btc_current_normalized_supply_price_usd"] <- all_assets$data[[i]]$metrics$misc_data$btc_current_normalized_supply_price_usd
+}
+if (length(all_assets$data[[i]]$metrics$misc_data$btc_y2050_normalized_supply_price_usd) > 0){
+  crypto_data[i,"btc_y2050_normalized_supply_price_usd"] <- all_assets$data[[i]]$metrics$misc_data$btc_y2050_normalized_supply_price_usd
+}
+if (length(all_assets$data[[i]]$metrics$misc_data$asset_created_at) > 0){
+  crypto_data[i,"asset_created_date"] <- all_assets$data[[i]]$metrics$misc_data$asset_created_at
+}
+if (length(all_assets$data[[i]]$metrics$misc_data$asset_age_days) > 0){
+  crypto_data[i,"asset_age_days"] <- all_assets$data[[i]]$metrics$misc_data$asset_age_days
+}
+if (length(all_assets$data[[i]]$metrics$misc_data$categories) > 0){
+  crypto_data[i,"category"] <- all_assets$data[[i]]$metrics$misc_data$categories
+}
+# if (length(all_assets$data[[i]]$metrics$misc_data$sectors) > 0){
+#   crypto_data[i,"sector"] <- all_assets$data[[i]]$metrics$misc_data$sectors
+# }
 # Lend Rates
 if (length(all_assets$data[[i]]$metrics$lend_rates$bitfinex) > 0){
   crypto_data[i,"lend_rates_bitfinex"] <- all_assets$data[[i]]$metrics$lend_rates$bitfinex
 }
-#ENTER THE REST HERE (only did first)
-
+if (length(all_assets$data[[i]]$metrics$lend_rates$block_fi) > 0){
+  crypto_data[i,"lend_rates_block_fi"] <- all_assets$data[[i]]$metrics$lend_rates$block_fi
+}
+if (length(all_assets$data[[i]]$metrics$lend_rates$celsius) > 0){
+  crypto_data[i,"lend_rates_celsius"] <- all_assets$data[[i]]$metrics$lend_rates$celsius
+}
+# if (length(all_assets$data[[i]]$metrics$lend_rates$coin_list) > 0){
+#   crypto_data[i,"lend_rates_coin_list"] <- all_assets$data[[i]]$metrics$lend_rates$celsius
+# }
+if (length(all_assets$data[[i]]$metrics$lend_rates$poloniex) > 0){
+  crypto_data[i,"lend_rates_poloniex"] <- all_assets$data[[i]]$metrics$lend_rates$poloniex
+}
 # Borrow Rates
 if (length(all_assets$data[[i]]$metrics$borrow_rates$coin_list) > 0){
   crypto_data[i,"borrow_rates_coin_list"] <- all_assets$data[[i]]$metrics$borrow_rates$coin_list
 }
-#ENTER THE REST HERE (only did first)
- 
 # Loan Data
 if (length(all_assets$data[[i]]$metrics$loan_data$originated_last_24_hours_usd) > 0){
   crypto_data[i,"loans_originated_last_24_hours_usd"] <- all_assets$data[[i]]$metrics$loan_data$originated_last_24_hours_usd
 }
-#ENTER THE REST HERE (only did first)
- 
+if (length(all_assets$data[[i]]$metrics$loan_data$outstanding_debt_usd) > 0){
+  crypto_data[i,"loans_outstanding_debt_usd"] <- all_assets$data[[i]]$metrics$loan_data$originated_last_24_hours_usd
+}
+if (length(all_assets$data[[i]]$metrics$loan_data$repaid_last_24_hours_usd) > 0){
+  crypto_data[i,"loans_repaid_last_24_hours_usd"] <- all_assets$data[[i]]$metrics$loan_data$repaid_last_24_hours_usd
+}
+if (length(all_assets$data[[i]]$metrics$loan_data$collateralized_last_24_hours_usd) > 0){
+  crypto_data[i,"loans_collateralized_last_24_hours_usd"] <- all_assets$data[[i]]$metrics$loan_data$collateralized_last_24_hours_usd
+}
+if (length(all_assets$data[[i]]$metrics$loan_data$collateral_liquidated_last_24_hours_usd) > 0){
+  crypto_data[i,"loans_collateral_liquidated_last_24_hours_usd"] <- all_assets$data[[i]]$metrics$loan_data$collateral_liquidated_last_24_hours_usd
+}
 # Reddit
 if (length(all_assets$data[[i]]$metrics$reddit$active_user_count) > 0){
   crypto_data[i,"reddit_active_user_count"] <- all_assets$data[[i]]$metrics$reddit$active_user_count
 }
-#ENTER THE REST HERE (only did first)
- 
-# Profile
-if (length(all_assets$data[[i]]$profile$overview) > 0){
-  crypto_data[i,"cycle_low_price"] <- all_assets$data[[i]]$profile$overview
+if (length(all_assets$data[[i]]$metrics$reddit$subscribers) > 0){
+  crypto_data[i,"reddit_subscribers"] <- all_assets$data[[i]]$metrics$reddit$subscribers
 }
-#ENTER THE REST HERE (only did first)
-
+# Profile
+if (length(all_assets$data[[i]]$profile$tagline) > 0){
+  crypto_data[i,"tagline"] <- all_assets$data[[i]]$profile$tagline
+}
+if (length(all_assets$data[[i]]$profile$overview) > 0){
+  crypto_data[i,"overview"] <- all_assets$data[[i]]$profile$overview
+}
+if (length(all_assets$data[[i]]$profile$background) > 0){
+  crypto_data[i,"background"] <- all_assets$data[[i]]$profile$background
+}
+if (length(all_assets$data[[i]]$profile$technology) > 0){
+  crypto_data[i,"technology"] <- all_assets$data[[i]]$profile$technology
+}
+if (length(all_assets$data[[i]]$profile$category) > 0){
+  crypto_data[i,"category"] <- all_assets$data[[i]]$profile$category
+}
+if (length(all_assets$data[[i]]$profile$sector) > 0){
+  crypto_data[i,"sector"] <- all_assets$data[[i]]$profile$sector
+}
+if (length(all_assets$data[[i]]$profile$tag) > 0){
+  crypto_data[i,"tag"] <- all_assets$data[[i]]$profile$tag
+}
+if (length(all_assets$data[[i]]$profile$sfarScore) > 0){
+  crypto_data[i,"sfarScore"] <- all_assets$data[[i]]$profile$sfarScore
+}
+#Decided to stop here
 }
 
 # unique the data
@@ -210,7 +433,8 @@ crypto_data$pkDummy <- substr(crypto_data$date_time, 1,13)
 # add pkey
 crypto_data$pkey <- paste0(crypto_data$pkDummy,crypto_data$symbol)
 
-
+# rename first field
+crypto_data <- crypto_data %>% rename(Rank=X1.20)
 
 #### HERE WRITE DATA TO DB ####
 library(DBI)
@@ -224,7 +448,7 @@ getSqlConnection <- function(){
       username = Sys.getenv('user'),
       password = Sys.getenv('pswd'),
       host = Sys.getenv('ipAddress'),
-      dbname = 'ScrapeStorm'
+      dbname = 'Octoparse'
     )
   return(con)
 }
@@ -232,44 +456,46 @@ database_connection <- getSqlConnection()
 
 
 # write data to database
-#dbWriteTable(database_connection, "NEW TABLE HERE",df, append=T)
+dbWriteTable(database_connection, "Messari_R", crypto_data, append=T)
+
+
+
+#### HERE PIN DATA ####
+messari <- crypto_data
+pins::board_register_github(name = "github", repo = "predictcrypto/pins", branch = "master", token = github_PAT_pin)
+pins::pin(messari,board='github')
+
+
+
+
+
+
+
+#### KEEP GOING HERE
+
+### After top 20, also setup logic to get unique symbols from db and get 
+# data for the rest of the cryptocurrencies
+
+
+# https://messari.io/api/docs#operation/Get%20Asset%20Metrics
+
+# Use purrr to iterate through every symbol option
+all_by_symbol <- httr::GET("https://data.messari.io/api/v1/assets/btc/metrics")
+
+all_by_symbol <- get_response_content(all_by_symbol)
+
+
+### KEEP GOING HERE
+
+
+
+
+
+
 
 
 # Disconnect from the database
 dbDisconnect(database_connection)
 
 
-#### HERE PIN DATA ####
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Do I not even need Purrr? Could get list of symbols from db data pull 
-#of latest symbols from ScrapeStorm table

@@ -1,0 +1,21 @@
+on:
+  schedule:
+  - cron: "00 * * * *"
+
+name: update_data
+
+jobs:
+  R-CMD-check:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-r@master
+      - name: Install dependencies
+        run: |
+          install.packages(c("remotes", "rcmdcheck","httr","jsonlite","dplyr","DBI","RMariaDB","devtools"))
+          remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+      - name: Pull data and update db and pin
+        run: |
+          source('pull_messari_data_scheduled.R')
+        shell: Rscript {0}
