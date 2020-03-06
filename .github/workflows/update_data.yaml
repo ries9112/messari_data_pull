@@ -1,6 +1,4 @@
-on:
-  schedule:
-  - cron: "00 * * * *"
+on: [push]
     
 name: update_data
 
@@ -13,7 +11,6 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("remotes", "rcmdcheck","httr","jsonlite","dplyr","DBI","RMariaDB","devtools"))
-          remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
       - name: Pull data and update db and pin
         run: |
