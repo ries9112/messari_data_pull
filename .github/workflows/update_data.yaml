@@ -13,9 +13,4 @@ jobs:
           install.packages(c("remotes", "rcmdcheck","httr","jsonlite","dplyr","DBI","RMariaDB","devtools"))
         shell: Rscript {0}
       - name: Pull data and update db and pin
-        run: |
-          db_user <- "${{secrets.db_user}}"
-          db_ip <- "${{secrets.db_ip}}"
-          db_pswd <- "${{secrets.db_pswd}}"
-          source('pull_messari_data_scheduled.R')
-        shell: Rscript {0}
+        run: Rscript -e 'db_user <- "${{secrets.db_user}}"' -e 'db_ip <- "${{secrets.db_ip}}"' -e 'db_pswd <- "${{secrets.db_pswd}}"' -e 'source("pull_messari_data_scheduled.R")'
