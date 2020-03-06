@@ -1,5 +1,7 @@
-on: [push]
-
+on:
+  schedule:
+  - cron: "00 * * * *"
+    
 name: update_data
 
 jobs:
