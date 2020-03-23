@@ -897,8 +897,8 @@ for (i in 1:nrow(symbols)){
   
 }, error=function(e){})}
 
-# filter out rows with Null name
-full_data <- full_data %>% filter(is.na(name) != 1)
+# filter out rows with Null price_usd
+full_data <- full_data %>% filter(is.na(price_usd) != 1)
 
 # write data to database
 dbWriteTable(database_connection, "Messari_R", full_data, append=T)
