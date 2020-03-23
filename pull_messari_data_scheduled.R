@@ -437,21 +437,21 @@ get_response_content <- function(api_response) {
 # crypto_data <- crypto_data %>% rename(Rank=X1.20)
 
 #### HERE WRITE DATA TO DB ####
-getSqlConnection <- function(){
-  con <-
-    dbConnect(
-      RMariaDB::MariaDB(),
-      username = db_user,
-      password = db_pswd,
-      host = db_ip,
-      dbname = 'Octoparse'
-    )
-  return(con)
-}
-database_connection <- getSqlConnection()
-
-# write data to database
-dbWriteTable(database_connection, "Messari_R", crypto_data, append=T)
+# getSqlConnection <- function(){
+#   con <-
+#     dbConnect(
+#       RMariaDB::MariaDB(),
+#       username = db_user,
+#       password = db_pswd,
+#       host = db_ip,
+#       dbname = 'Octoparse'
+#     )
+#   return(con)
+# }
+# database_connection <- getSqlConnection()
+# 
+# # write data to database
+# dbWriteTable(database_connection, "Messari_R", crypto_data, append=T)
 
 # query symbols
 getSqlConnection <- function(){
