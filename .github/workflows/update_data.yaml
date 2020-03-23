@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
-      - name: Install dependencies
+      - name: Install dependencies and pull and upload data
         run: |
           install.packages(c("remotes", "rcmdcheck", "httr", "jsonlite", "dplyr", "DBI", "RMariaDB"))
           db_user <- "${{secrets.db_user}}"
