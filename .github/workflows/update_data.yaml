@@ -11,12 +11,8 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("remotes", "rcmdcheck", "httr", "jsonlite", "dplyr", "DBI", "RMariaDB"))
-          remotes::install_deps(dependencies = TRUE)
           db_user <- "${{secrets.db_user}}"
           db_pswd <- "${{secrets.db_psw}}"
           db_ip <- "${{secrets.db_ip}}"
           source("pull_messari_data_scheduled.R")
-        shell: Rscript {0}
-      - name: Check
-        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
