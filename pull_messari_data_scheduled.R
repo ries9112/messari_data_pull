@@ -426,10 +426,10 @@ get_response_content <- function(api_response) {
 # 
 # # add date and date_time
 # crypto_data$date <- Sys.Date()
-# crypto_data$date_time <- Sys.time()
+# crypto_data$date_time_utc <- Sys.time()
 # 
 # # add pkDummy
-# crypto_data$pkDummy <- substr(crypto_data$date_time, 1,13)
+# crypto_data$pkDummy <- substr(crypto_data$date_time_utc, 1,13)
 # # add pkey
 # crypto_data$pkey <- paste0(crypto_data$pkDummy,crypto_data$symbol)
 # 
@@ -889,7 +889,7 @@ for (i in 1:nrow(symbols)){
   if (length(all_assets$data$profile$sfarScore) > 0){
     full_data[i,"sfarScore"] <- all_assets$data$profile$sfarScore
   }
-  full_data[i,"date_time"] <- Sys.time()
+  full_data[i,"date_time_utc"] <- Sys.time()
   full_data[i,"date"] <- substr(Sys.time(), 1, 10)
   #make pkDummy and pkey
   full_data[i,"pkDummy"] <- substr(Sys.time(), 1, 13)
