@@ -481,15 +481,23 @@ symbols <- dbFetch(dbSendQuery(database_connection, query), 20000)
 # Use purrr to iterate through every symbol option
 full_data <- data.frame()
 full_dataset <- data.frame()
-for (i in 1:length(symbols)){
+for (i in 1:nrow(symbols)){
   all_assets <- httr::GET(paste0("https://data.messari.io/api/v1/assets/",symbols[i,'Symbol'],"/metrics"))
   all_assets <- get_response_content(all_assets)
   
-  full_data[i, 'symbol'] <- all_assets$data$symbol
-  full_data[i,'name'] <- all_assets$data$name
+  if (length(all_assets$data$symbol) > 0){
+    full_data[i, 'symbol'] <- all_assets$data$symbol
+  }
+  if (length(all_assets$data$name) > 0){
+    full_data[i,'name'] <- all_assets$data$name
+  }
   # Market Data
-  full_data[i,'price_usd'] <- all_assets$data$market_data$price_usd
-  full_data[i,'price_btc'] <- all_assets$data$market_data$price_btc
+  if (length(all_assets$data$market_data$price_usd) > 0){
+    full_data[i,'price_usd'] <- all_assets$data$market_data$price_usd
+  }
+  if (length(all_assets$data$market_data$price_btc) > 0){
+    full_data[i,'price_btc'] <- all_assets$data$market_data$price_btc
+  }
   # STEPS FAIL IF DON'T CHECK THEIR LENGTH FIRST:
   if (length(all_assets$data$market_data$volume_last_24_hours) > 0){
     full_data[i,'volume_last_24_hours'] <- all_assets$data$market_data$volume_last_24_hours
@@ -880,7 +888,11 @@ for (i in 1:length(symbols)){
   if (length(all_assets$data$profile$sfarScore) > 0){
     full_data[i,"sfarScore"] <- all_assets$data$profile$sfarScore
   }
-  
+  full_data[i,"date_time"] <- Sys.time()
+  full_data[i,"date"] <- substr(Sys.time(), 1, 10)
+  #make pkDummy and pkey
+  full_data[i,"pkDummy"] <- substr(Sys.time(), 1, 13)
+  full_data[i,"pkey"] <- paste0(full_data[i,'pkDummy'], full_data[i,'symbol'])
 }
 
 
@@ -889,6 +901,7 @@ dbWriteTable(database_connection, "Messari_R", full_data, append=T)
 
 
 
+# NOTE FOR FUTURE DEV: RUNS INTO ISSUE AND STOPS ITERATING ON #15 INSTEAD OF RUNNING ALL OF THEM ON 03/23
 
 
 
@@ -903,4 +916,6 @@ messari <- full_data
 
 # Disconnect from the database
 dbDisconnect(database_connection)
+
+
 
