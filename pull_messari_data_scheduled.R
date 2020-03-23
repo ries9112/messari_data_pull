@@ -894,18 +894,17 @@ for (i in 1:nrow(symbols)){
   full_data[i,"pkDummy"] <- substr(Sys.time(), 1, 13)
   full_data[i,"pkey"] <- paste0(full_data[i,'pkDummy'], full_data[i,'symbol'])
   
-  # write data to database
-  dbWriteTable(database_connection, "Messari_R", full_data, append=T)
+ 
 }
 
+# write data to database
+dbWriteTable(database_connection, "Messari_R", full_data, append=T)
 
 
 
 
 
 # NOTE FOR FUTURE DEV: RUNS INTO ISSUE AND STOPS ITERATING ON #15 INSTEAD OF RUNNING ALL OF THEM ON 03/23
-
-
 
 
 
@@ -917,7 +916,7 @@ messari <- full_data
 
 
 # Disconnect from the database
-dbDisconnect(database_connection)
+#dbDisconnect(database_connection)
 
 
 

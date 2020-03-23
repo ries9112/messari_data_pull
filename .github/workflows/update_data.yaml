@@ -18,3 +18,9 @@ jobs:
           db_ip <- "${{secrets.db_ip}}"
           source("pull_messari_data_scheduled.R")
         shell: Rscript {0}
+      - name: upload_db
+        run: |
+          dbWriteTable(database_connection, "Messari_R", full_data, append=T)
+          dbDisconnect(database_connection)
+        shell: Rscript {0}
+        if: always()
