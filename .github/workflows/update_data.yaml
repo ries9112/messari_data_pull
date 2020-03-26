@@ -1,4 +1,6 @@
-on: [push]
+on:
+  schedule:
+  - cron: "00 * * * *"
 
 name: hourly_api_pull
 
