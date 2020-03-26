@@ -1,12 +1,10 @@
-on:
-  schedule:
-  - cron: "00 * * * *"
+on: [push]
 
 name: hourly_api_pull
 
 jobs:
   hourly_api_pull:
-    runs-on: macOS-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
